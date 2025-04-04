@@ -21,7 +21,7 @@ class EventoUpdate(BaseModel):
     ubicacion: Optional[str] = None
     categoria_id: Optional[int] = None
 
-    class EventoResponse(EventoBase):
+class EventoResponse(EventoBase):
         id: int
         notificacion_enviada: bool
 

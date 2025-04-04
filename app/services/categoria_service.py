@@ -3,7 +3,7 @@ from app.models.categoria import Categoria
 from app.schemas.categoria import CategoriaCreate
 from fastapi import HTTPException
 
-def get_categorias(db: Session, skip:int = 0, limit: int=10):
+def get_categorias(db: Session, skip: int = 0, limit: int = 100):
     return db.query(Categoria).offset(skip).limit(limit).all()
 
 def get_categoria(db: Session, categoria_id: int):
@@ -16,7 +16,7 @@ def create_categoria(db: Session, categoria: CategoriaCreate):
     db_categoria = db.query(Categoria).filter(Categoria.nombre == categoria.nombre).first()
     if db_categoria:
         raise HTTPException(status_code=400, detail="Esta categoria ya existe")
-    db.categoria = Categoria(**categoria.dict())
+    db_categoria = Categoria(**categoria.dict())
     db.add(db_categoria)
     db.commit()
     db.refresh(db_categoria)
@@ -32,10 +32,12 @@ def update_categoria(db: Session, categoria_id: int, categoria: CategoriaCreate)
 
 def delete_categoria(db: Session, categoria_id: int):
     db_categoria = get_categoria(db, categoria_id)
+    
     from app.models.evento import Evento
     eventos_asociados = db.query(Evento).filter(Evento.categoria_id == categoria_id).count()
     if eventos_asociados > 0:
         raise HTTPException(status_code=400, detail="No se puede eliminar la categoria porque tiene eventos asociados")
+    
     db.delete(db_categoria)
     db.commit()
     return {"mensaje": "Categoria eliminada"}
